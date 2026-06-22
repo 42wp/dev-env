@@ -1,0 +1,29 @@
+services:
+  wordpress:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: wp_{{DB_NAME}}
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_USER: root
+      WORDPRESS_DB_PASSWORD: root
+      WORDPRESS_DB_NAME: {{DB_NAME}}
+    volumes:
+      - {{REPO_DIR}}:/var/www/html/wp-content
+      - ./wp-config.php:/var/www/html/wp-config.php
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.{{DB_NAME}}.rule=Host(`{{DOMAIN}}`)"
+    networks:
+      - 42wp_network
+
+  memcached:
+    image: memcached:alpine
+    container_name: memcached_{{DB_NAME}}
+    networks:
+      - 42wp_network
+
+networks:
+  42wp_network:
+    external: true

@@ -1,0 +1,33 @@
+{
+  "name": "@42wp/dev-env",
+  "version": "1.0.0",
+  "description": "42WP — a CLI to spin up disposable WordPress dev environments with Docker (Traefik + MySQL + per-project containers).",
+  "type": "module",
+  "bin": {
+    "42wp": "bin/42wp.js"
+  },
+  "files": [
+    "bin",
+    "src"
+  ],
+  "engines": {
+    "node": ">=18.17"
+  },
+  "scripts": {
+    "test": "node --test"
+  },
+  "keywords": [
+    "wordpress",
+    "docker",
+    "cli",
+    "dev-environment",
+    "traefik",
+    "wp-cli",
+    "42wp"
+  ],
+  "author": "João Carvalho <joao@carvalho.cc>",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  }
+}
