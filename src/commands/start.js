@@ -9,16 +9,35 @@ import { normalizeName, validateName, dbName, domain, containerName } from '../l
 import { projectDir } from '../lib/paths.js';
 import { renderTemplate, render, readTemplate } from '../lib/render.js';
 import { fetchSalts } from '../lib/salts.js';
-import { compose, dockerExec, dockerExecCapture } from '../lib/docker.js';
+import { run, compose, dockerExec, dockerExecCapture } from '../lib/docker.js';
 import { pollUntil } from '../lib/wait.js';
 import { step, success, plain, error, colors } from '../lib/log.js';
 import { t } from '../lib/i18n.js';
-import { resolveWpTag, wpImage } from '../lib/config.js';
+import {
+  resolveWpTag,
+  wpImage,
+  DEFAULT_ADMIN_USER,
+  DEFAULT_ADMIN_PASS,
+  VIP_MU_PLUGINS_REPO,
+} from '../lib/config.js';
 import { ensureDockerRunning, checkGlobalLayer } from './global.js';
 
-const ADMIN_USER = 'admin';
-const ADMIN_PASS = 'password';
 const ADMIN_EMAIL = 'dev@42wp.localhost';
+
+// Clone (or update) the VIP mu-plugins into <envDir>/mu-plugins; it gets mounted
+// into the container at wp-content/mu-plugins. Shallow + single-branch — the
+// prebuilt repo is large and we only need the working tree.
+async function ensureVipMuPlugins(envDir) {
+  const muDir = path.join(envDir, 'mu-plugins');
+  try {
+    await fs.access(path.join(muDir, '.git'));
+    step(t('start.vipUpdating'));
+    await run('git', ['-C', muDir, 'pull', '--ff-only']);
+  } catch {
+    step(t('start.vipCloning', { repo: VIP_MU_PLUGINS_REPO }));
+    await run('git', ['clone', '--depth', '1', '--single-branch', VIP_MU_PLUGINS_REPO, muDir]);
+  }
+}
 
 export async function start(rawName, opts = {}) {
   if (!rawName) {
@@ -37,6 +56,8 @@ export async function start(rawName, opts = {}) {
   const db = dbName(name);
   const container = containerName(db);
   const envDir = projectDir(name);
+  const adminUser = opts.user || DEFAULT_ADMIN_USER;
+  const adminPass = opts.pass || DEFAULT_ADMIN_PASS;
 
   if (!(await ensureDockerRunning())) return;
   await checkGlobalLayer();
@@ -70,14 +91,22 @@ export async function start(rawName, opts = {}) {
   const dockerfile = await renderTemplate('project.Dockerfile', { WP_TAG: wpTag });
   await fs.writeFile(path.join(envDir, 'Dockerfile'), dockerfile, 'utf8');
 
-  // 4. Project docker-compose.yml.
+  // 4. Project docker-compose.yml (mount VIP mu-plugins when --vip is set).
   step(t('start.genCompose'));
+  const extraVolumes = opts.vip
+    ? '\n      - ./mu-plugins:/var/www/html/wp-content/mu-plugins'
+    : '';
   const projectCompose = await renderTemplate('project.docker-compose.yml', {
     DB_NAME: db,
     DOMAIN: dom,
     REPO_DIR: repoDir,
+    EXTRA_VOLUMES: extraVolumes,
   });
   await fs.writeFile(path.join(envDir, 'docker-compose.yml'), projectCompose, 'utf8');
+
+  // 4b. WordPress VIP: clone the mu-plugins before bringing the container up so the
+  // mount source exists.
+  if (opts.vip) await ensureVipMuPlugins(envDir);
 
   // 5. Build & start project containers.
   step(t('start.upping'));
@@ -101,8 +130,8 @@ export async function start(rawName, opts = {}) {
     'install',
     `--url=http://${dom}`,
     `--title=Dev: ${dom}`,
-    `--admin_user=${ADMIN_USER}`,
-    `--admin_password=${ADMIN_PASS}`,
+    `--admin_user=${adminUser}`,
+    `--admin_password=${adminPass}`,
     `--admin_email=${ADMIN_EMAIL}`,
     '--skip-email',
     '--skip-plugins',
@@ -125,6 +154,6 @@ export async function start(rawName, opts = {}) {
   success(t('start.success'));
   plain(colors.green(t('start.url', { url })));
   plain(colors.green(t('start.admin', { url })));
-  plain(colors.green(t('start.user', { user: ADMIN_USER })));
-  plain(colors.green(t('start.pass', { pass: ADMIN_PASS })));
+  plain(colors.green(t('start.user', { user: adminUser })));
+  plain(colors.green(t('start.pass', { pass: adminPass })));
 }

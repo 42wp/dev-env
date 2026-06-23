@@ -51,6 +51,30 @@ PHP 8.4, Apache). Pick a different image tag per project with `--wp <tag>`:
 container and runs `wp core update-db` to migrate the schema. Set a different
 default for every project with the `FORTYTWO_WP_TAG` env var.
 
+### Admin credentials
+
+The silent install creates an `admin` / `password` user by default. Override per
+project on `start`:
+
+```bash
+42wp start my-theme --user joao --pass s3cr3t
+```
+
+### WordPress VIP (mu-plugins)
+
+WPVIP sites expect the VIP Go mu-plugins under `wp-content/mu-plugins`. Pass
+`--vip` to `start` and the tool clones
+[`vip-go-mu-plugins-built`](https://github.com/Automattic/vip-go-mu-plugins-built)
+(shallow) and mounts it into the container at `wp-content/mu-plugins`:
+
+```bash
+42wp start my-vip-site --vip
+```
+
+The clone lives in the project's data dir (`~/.42wp/projects/<name>/mu-plugins`),
+so it never touches your repo, and re-running `start` fast-forwards it. Regular
+(non-VIP) projects are unaffected.
+
 ### Example
 
 ```bash

@@ -8,6 +8,14 @@
 
 export const DEFAULT_WP_TAG = 'php8.4-apache';
 
+// Default admin credentials for the silent install (override with --user / --pass).
+export const DEFAULT_ADMIN_USER = 'admin';
+export const DEFAULT_ADMIN_PASS = 'password';
+
+// WordPress VIP: the prebuilt mu-plugins, cloned into the project and mounted at
+// wp-content/mu-plugins when `start --vip` is used.
+export const VIP_MU_PLUGINS_REPO = 'https://github.com/Automattic/vip-go-mu-plugins-built';
+
 // Resolve the effective tag: explicit flag wins, then env var, then default.
 export function resolveWpTag(override) {
   return override || process.env.FORTYTWO_WP_TAG || DEFAULT_WP_TAG;

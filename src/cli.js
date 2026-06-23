@@ -20,17 +20,29 @@ function extractLang(argv) {
   return lang;
 }
 
-// Pull recognized options (--wp <tag> / --wp=<tag>) out of an arg list, leaving
-// positionals behind. Used by `start` and `update`; NOT by `wp`, whose args pass
-// through verbatim to WP-CLI.
-function parseOpts(args) {
+// Flags that take a value (--wp tag, --user bob, --pass secret). Anything else
+// (e.g. --vip) is a boolean. The `--key=value` form works for all of them.
+const VALUE_FLAGS = new Set(['wp', 'user', 'pass']);
+
+// Pull options out of an arg list, leaving positionals behind. Used by `start`
+// and `update`; NOT by `wp`, whose args pass through verbatim to WP-CLI.
+export function parseOpts(args) {
   const opts = {};
   const positionals = [];
   for (let i = 0; i < args.length; i++) {
     const a = args[i];
-    if (a === '--wp') opts.wp = args[++i];
-    else if (a.startsWith('--wp=')) opts.wp = a.slice('--wp='.length);
-    else positionals.push(a);
+    if (a.startsWith('--')) {
+      const eq = a.indexOf('=');
+      if (eq !== -1) {
+        opts[a.slice(2, eq)] = a.slice(eq + 1);
+      } else {
+        const key = a.slice(2);
+        if (VALUE_FLAGS.has(key)) opts[key] = args[++i];
+        else opts[key] = true; // boolean flag
+      }
+    } else {
+      positionals.push(a);
+    }
   }
   return { opts, positionals };
 }

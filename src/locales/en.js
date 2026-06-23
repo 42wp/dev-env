@@ -20,6 +20,8 @@ export default {
   'start.saltsFallback': 'Could not reach api.wordpress.org; generated salts locally.',
   'start.genDockerfile': 'Generating Dockerfile (${image})...',
   'start.genCompose': 'Generating project docker-compose...',
+  'start.vipCloning': 'Cloning WordPress VIP mu-plugins (${repo})...',
+  'start.vipUpdating': 'Updating WordPress VIP mu-plugins...',
   'start.upping': 'Starting project containers...',
   'start.waitingWp': 'Waiting for the WordPress container to respond...',
   'start.installing': 'Running silent WordPress install...',
