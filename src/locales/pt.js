@@ -25,12 +25,14 @@ export default {
   'start.upping': 'Subindo containers do projeto...',
   'start.waitingWp': 'Aguardando o container WP responder...',
   'start.installing': 'Executando instalação silenciosa do WordPress...',
+  'start.installingMultisite': 'Executando instalação silenciosa do WordPress multisite...',
   'start.permalinks': 'Configurando Permalinks...',
   'start.success': 'Sucesso! O projeto está online.',
   'start.url': 'URL:      ${url}',
   'start.admin': 'Admin:    ${url}/wp-admin',
   'start.user': 'Usuário:  ${user}',
   'start.pass': 'Senha:    ${pass}',
+  'start.multisite': 'Multisite: ${mode}. Admin da rede: ${url}/wp-admin/network/',
 
   // update
   'update.needName': 'Informe o projeto para atualizar. Ex: 42wp update jovempan',

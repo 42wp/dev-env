@@ -24,6 +24,16 @@ export function containerName(db) {
   return `wp_${db}`;
 }
 
+// Traefik router rule for a project. Subdomain multisite needs a wildcard host so
+// that sub-site hosts (<sub>.<domain>) route to the same container; otherwise an
+// exact Host() match is enough. Returned with literal backticks for the label;
+// the compose template wraps it in single quotes so the backslashes survive YAML.
+export function routerRule(dom, { subdomains = false } = {}) {
+  if (!subdomains) return `Host(\`${dom}\`)`;
+  const esc = dom.replace(/\./g, '\\.');
+  return `HostRegexp(\`^([a-z0-9-]+\\.)?${esc}$\`)`;
+}
+
 // Guard against shell/SQL/container-name injection in the original's interpolated
 // `CREATE DATABASE` and container names. Accepts simple slug characters only.
 export function validateName(name) {

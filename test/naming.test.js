@@ -7,6 +7,7 @@ import {
   domain,
   containerName,
   validateName,
+  routerRule,
 } from '../src/lib/naming.js';
 
 test('normalizeName strips a single trailing suffix', () => {
@@ -31,4 +32,12 @@ test('validateName accepts slugs and rejects unsafe input', () => {
   for (const bad of ['', 'a b', 'foo;bar', '../etc', 'name`cmd`', 'na.me']) {
     assert.throws(() => validateName(bad), /Invalid|inválido/);
   }
+});
+
+test('routerRule: exact host by default, wildcard for subdomain multisite', () => {
+  assert.equal(routerRule('demo.localhost'), 'Host(`demo.localhost`)');
+  assert.equal(
+    routerRule('demo.localhost', { subdomains: true }),
+    'HostRegexp(`^([a-z0-9-]+\\.)?demo\\.localhost$`)',
+  );
 });

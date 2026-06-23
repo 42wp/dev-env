@@ -75,6 +75,22 @@ project on `start`:
 42wp start my-theme --user joao --pass s3cr3t
 ```
 
+### Multisite
+
+Start a site as a WordPress network with `--multisite` (subdirectory) or add
+`--subdomains` for a subdomain network:
+
+```bash
+42wp start my-network --multisite               # sites at my-network.localhost/site2
+42wp start my-network --multisite --subdomains  # sites at site2.my-network.localhost
+```
+
+This runs `wp core multisite-install` (which writes the `MULTISITE` constants into
+`wp-config.php`). For **subdomain** networks the Traefik router is widened to a
+wildcard (`*.my-network.localhost`) so sub-sites route to the container — and
+`*.localhost` already resolves to `127.0.0.1`, so no `/etc/hosts` edits are needed.
+Network admin lives at `…/wp-admin/network/`.
+
 ### WordPress VIP (mu-plugins)
 
 WPVIP sites expect the VIP Go mu-plugins under `wp-content/mu-plugins`. Pass

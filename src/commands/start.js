@@ -5,7 +5,14 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-import { normalizeName, validateName, dbName, domain, containerName } from '../lib/naming.js';
+import {
+  normalizeName,
+  validateName,
+  dbName,
+  domain,
+  containerName,
+  routerRule,
+} from '../lib/naming.js';
 import { projectDir } from '../lib/paths.js';
 import { renderTemplate, render, readTemplate } from '../lib/render.js';
 import { fetchSalts } from '../lib/salts.js';
@@ -58,6 +65,9 @@ export async function start(rawName, opts = {}) {
   const envDir = projectDir(name);
   const adminUser = opts.user || DEFAULT_ADMIN_USER;
   const adminPass = opts.pass || DEFAULT_ADMIN_PASS;
+  // --subdomains implies multisite; without it, --multisite is subdirectory mode.
+  const subdomains = !!opts.subdomains;
+  const multisite = !!opts.multisite || subdomains;
 
   if (!(await ensureDockerRunning())) return;
   await checkGlobalLayer();
@@ -101,6 +111,7 @@ export async function start(rawName, opts = {}) {
     DOMAIN: dom,
     REPO_DIR: repoDir,
     EXTRA_VOLUMES: extraVolumes,
+    ROUTER_RULE: routerRule(dom, { subdomains }),
   });
   await fs.writeFile(path.join(envDir, 'docker-compose.yml'), projectCompose, 'utf8');
 
@@ -122,22 +133,23 @@ export async function start(rawName, opts = {}) {
     { label: 'WordPress', timeout: 90000 },
   );
 
-  // 7. Silent install.
-  step(t('start.installing'));
-  await dockerExec(container, [
+  // 7. Silent install — multisite-install enables the network and (by default)
+  // writes the MULTISITE constants into the mounted wp-config.php.
+  step(t(multisite ? 'start.installingMultisite' : 'start.installing'));
+  const installArgs = [
     'wp',
     'core',
-    'install',
+    multisite ? 'multisite-install' : 'install',
     `--url=http://${dom}`,
     `--title=Dev: ${dom}`,
     `--admin_user=${adminUser}`,
     `--admin_password=${adminPass}`,
     `--admin_email=${ADMIN_EMAIL}`,
     '--skip-email',
-    '--skip-plugins',
-    '--skip-themes',
-    '--allow-root',
-  ]);
+  ];
+  if (subdomains) installArgs.push('--subdomains');
+  installArgs.push('--skip-plugins', '--skip-themes', '--allow-root');
+  await dockerExec(container, installArgs);
 
   // 8. Pretty permalinks.
   step(t('start.permalinks'));
@@ -156,4 +168,8 @@ export async function start(rawName, opts = {}) {
   plain(colors.green(t('start.admin', { url })));
   plain(colors.green(t('start.user', { user: adminUser })));
   plain(colors.green(t('start.pass', { pass: adminPass })));
+  if (multisite) {
+    const mode = subdomains ? 'subdomain' : 'subdirectory';
+    plain(colors.green(t('start.multisite', { mode, url })));
+  }
 }

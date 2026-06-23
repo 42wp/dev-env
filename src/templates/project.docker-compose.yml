@@ -14,7 +14,7 @@ services:
       - ./wp-config.php:/var/www/html/wp-config.php{{EXTRA_VOLUMES}}
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.{{DB_NAME}}.rule=Host(`{{DOMAIN}}`)"
+      - 'traefik.http.routers.{{DB_NAME}}.rule={{ROUTER_RULE}}'
     networks:
       - 42wp_network
 
