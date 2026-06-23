@@ -39,6 +39,19 @@ export default {
   'update.updatingDb': 'Atualizando o schema do banco (wp core update-db)...',
   'update.done': 'Atualizado! ${name} agora está no WordPress ${version}.',
 
+  // rm
+  'rm.needName': 'Informe o projeto para remover. Ex: 42wp rm jovempan',
+  'rm.notFound': "Projeto '${name}' não encontrado em ${dir}.",
+  'rm.confirm':
+    "Remover '${name}'? Isso apaga o container, a imagem e o banco de dados. Seu repositório é mantido.",
+  'rm.needYes': 'Removendo apenas com confirmação. Rode novamente com --yes.',
+  'rm.cancelled': 'Cancelado. Nada foi removido.',
+  'rm.removingContainers': 'Removendo containers e imagem de ${name}...',
+  'rm.droppingDb': 'Removendo banco de dados: ${db}',
+  'rm.mysqlDown': 'O MySQL global não está rodando — banco ${db} não foi removido.',
+  'rm.removingData': 'Removendo dados do projeto: ${dir}',
+  'rm.done': "Removido '${name}'. Seu repositório não foi tocado.",
+
   // stop
   'stop.needName': 'Informe o projeto para parar. Ex: 42wp stop jovempan',
   'stop.stopping': 'Parando o ambiente ${name}...',
@@ -58,6 +71,7 @@ export default {
   'usage.start': "  start <projeto>    Inicia o ambiente usando '.localhost'.",
   'usage.update': '  update <projeto>   Atualiza um projeto existente para uma imagem mais recente do WordPress.',
   'usage.stop': '  stop <projeto>     Para os containers do projeto.',
+  'usage.rm': '  rm <projeto>       Remove um site (container, imagem, banco) — mantém seu repositório.',
   'usage.wp': '  wp <projeto> ...   Executa um comando WP-CLI no container.',
   'usage.globalStart': '  global start       Inicia o proxy Traefik e o MySQL.',
   'usage.globalStop': '  global stop        Para a infraestrutura global.',

@@ -30,6 +30,7 @@ This installs the `42wp` command globally.
 42wp update <project>      # update an existing project to a newer WordPress image
 42wp wp <project> <args>   # run a WP-CLI command inside the project container
 42wp stop <project>        # stop a project's containers
+42wp rm <project>          # remove a site (container, image, database) — keeps your repo
 42wp global stop           # tear the global layer down
 ```
 
@@ -50,6 +51,20 @@ PHP 8.4, Apache). Pick a different image tag per project with `--wp <tag>`:
 `update` rewrites the project's Dockerfile, re-pulls the base image, recreates the
 container and runs `wp core update-db` to migrate the schema. Set a different
 default for every project with the `FORTYTWO_WP_TAG` env var.
+
+### Removing a site
+
+`42wp rm <project>` tears a site down completely — its containers, the locally
+built image, and its database — and deletes the generated project dir
+(`~/.42wp/projects/<name>/`, including any cloned VIP mu-plugins). **Your
+repository is never touched**: wp-content is a bind mount of your working
+directory, which Docker leaves alone. It asks for confirmation; skip the prompt
+with `--yes` (or `--force`):
+
+```bash
+42wp rm my-theme          # prompts before removing
+42wp rm my-theme --yes    # no prompt (for scripts/CI)
+```
 
 ### Admin credentials
 

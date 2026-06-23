@@ -8,6 +8,7 @@ import { start } from './commands/start.js';
 import { stop } from './commands/stop.js';
 import { wp } from './commands/wp.js';
 import { update } from './commands/update.js';
+import { rm } from './commands/rm.js';
 import { startGlobal, stopGlobal } from './commands/global.js';
 
 function extractLang(argv) {
@@ -54,6 +55,7 @@ function printUsage() {
   plain(t('usage.start'));
   plain(t('usage.update'));
   plain(t('usage.stop'));
+  plain(t('usage.rm'));
   plain(t('usage.wp'));
   plain(t('usage.globalStart'));
   plain(t('usage.globalStop'));
@@ -82,6 +84,12 @@ export async function run(rawArgs) {
     case 'stop':
       await stop(argv[1]);
       break;
+
+    case 'rm': {
+      const { opts, positionals } = parseOpts(argv.slice(1));
+      await rm(positionals[0], opts);
+      break;
+    }
 
     case 'wp':
       await wp(argv[1], argv.slice(2));

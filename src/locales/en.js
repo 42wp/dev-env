@@ -39,6 +39,19 @@ export default {
   'update.updatingDb': 'Updating database schema (wp core update-db)...',
   'update.done': 'Updated! ${name} is now on WordPress ${version}.',
 
+  // rm
+  'rm.needName': 'Tell me which project to remove. e.g.: 42wp rm jovempan',
+  'rm.notFound': "Project '${name}' not found at ${dir}.",
+  'rm.confirm':
+    "Remove '${name}'? This deletes its container, image and database. Your repository is kept.",
+  'rm.needYes': 'Refusing to remove without confirmation. Re-run with --yes.',
+  'rm.cancelled': 'Cancelled. Nothing was removed.',
+  'rm.removingContainers': 'Removing containers and image for ${name}...',
+  'rm.droppingDb': 'Dropping database: ${db}',
+  'rm.mysqlDown': 'Global MySQL is not running — skipped dropping database ${db}.',
+  'rm.removingData': 'Removing project data: ${dir}',
+  'rm.done': "Removed '${name}'. Your repository was left untouched.",
+
   // stop
   'stop.needName': 'Tell me which project to stop. e.g.: 42wp stop jovempan',
   'stop.stopping': 'Stopping the ${name} environment...',
@@ -58,6 +71,7 @@ export default {
   'usage.start': '  start <project>    Start the environment using \'.localhost\'.',
   'usage.update': '  update <project>   Update an existing project to a newer WordPress image.',
   'usage.stop': '  stop <project>     Stop the project containers.',
+  'usage.rm': '  rm <project>       Remove a site (container, image, database) — keeps your repo.',
   'usage.wp': '  wp <project> ...   Run a WP-CLI command inside the container.',
   'usage.globalStart': '  global start       Start the Traefik proxy and MySQL.',
   'usage.globalStop': '  global stop        Stop the global infrastructure.',
