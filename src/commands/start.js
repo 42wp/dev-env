@@ -23,6 +23,7 @@ import { t } from '../lib/i18n.js';
 import {
   resolveWpTag,
   wpImage,
+  multisiteConfig,
   DEFAULT_ADMIN_USER,
   DEFAULT_ADMIN_PASS,
   VIP_MU_PLUGINS_REPO,
@@ -85,15 +86,21 @@ export async function start(rawName, opts = {}) {
     `CREATE DATABASE IF NOT EXISTS \`${db}\`;`,
   ]);
 
-  // 2. Ephemeral wp-config.php (with real or locally-generated salts).
+  // 2. Ephemeral wp-config.php. The multisite constants are added later (step 7b),
+  //    AFTER the network tables exist — defining MULTISITE before they're created
+  //    would break wp-cli's bootstrap. For now write it without them.
   step(t('start.genConfig'));
   const { salts, fromFallback } = await fetchSalts();
   if (fromFallback) step(t('start.saltsFallback'));
-  const wpConfig = render(await readTemplate('wp-config.php'), {
-    DB_NAME: db,
-    WP_SALTS: salts,
-  });
-  await fs.writeFile(path.join(envDir, 'wp-config.php'), wpConfig, 'utf8');
+  const wpConfigPath = path.join(envDir, 'wp-config.php');
+  const wpConfigTemplate = await readTemplate('wp-config.php');
+  const writeWpConfig = (multisiteBlock) =>
+    fs.writeFile(
+      wpConfigPath,
+      render(wpConfigTemplate, { DB_NAME: db, WP_SALTS: salts, MULTISITE_CONFIG: multisiteBlock }),
+      'utf8',
+    );
+  await writeWpConfig('');
 
   // 3. Dockerfile (FROM the resolved WordPress image tag).
   const wpTag = resolveWpTag(opts.wp);
@@ -101,22 +108,33 @@ export async function start(rawName, opts = {}) {
   const dockerfile = await renderTemplate('project.Dockerfile', { WP_TAG: wpTag });
   await fs.writeFile(path.join(envDir, 'Dockerfile'), dockerfile, 'utf8');
 
-  // 4. Project docker-compose.yml (mount VIP mu-plugins when --vip is set).
+  // 4. Project docker-compose.yml. Extra bind mounts: VIP mu-plugins (--vip) and a
+  //    multisite .htaccess (wp-cli won't write network rewrite rules itself).
   step(t('start.genCompose'));
-  const extraVolumes = opts.vip
-    ? '\n      - ./mu-plugins:/var/www/html/wp-content/mu-plugins'
-    : '';
+  const extraVolumeLines = [];
+  if (opts.vip) extraVolumeLines.push('      - ./mu-plugins:/var/www/html/wp-content/mu-plugins');
+  if (multisite) extraVolumeLines.push('      - ./.htaccess:/var/www/html/.htaccess');
+  const extraVolumes = extraVolumeLines.length ? `\n${extraVolumeLines.join('\n')}` : '';
   const projectCompose = await renderTemplate('project.docker-compose.yml', {
     DB_NAME: db,
     DOMAIN: dom,
     REPO_DIR: repoDir,
     EXTRA_VOLUMES: extraVolumes,
-    ROUTER_RULE: routerRule(dom, { subdomains }),
+    // docker compose treats $ as interpolation, so a literal $ (the regex anchor)
+    // must be written as $$.
+    ROUTER_RULE: routerRule(dom, { subdomains }).split('$').join('$$'),
   });
   await fs.writeFile(path.join(envDir, 'docker-compose.yml'), projectCompose, 'utf8');
 
-  // 4b. WordPress VIP: clone the mu-plugins before bringing the container up so the
-  // mount source exists.
+  // 4b. Multisite needs custom rewrite rules; provide them via a mounted .htaccess
+  //     (written before `up` so the bind-mount source exists).
+  if (multisite) {
+    const htTemplate = subdomains ? 'htaccess.multisite-subdomain' : 'htaccess.multisite-subdir';
+    await fs.writeFile(path.join(envDir, '.htaccess'), await readTemplate(htTemplate), 'utf8');
+  }
+
+  // 4c. WordPress VIP: clone the mu-plugins before bringing the container up so the
+  //     mount source exists.
   if (opts.vip) await ensureVipMuPlugins(envDir);
 
   // 5. Build & start project containers.
@@ -133,23 +151,43 @@ export async function start(rawName, opts = {}) {
     { label: 'WordPress', timeout: 90000 },
   );
 
-  // 7. Silent install — multisite-install enables the network and (by default)
-  // writes the MULTISITE constants into the mounted wp-config.php.
-  step(t(multisite ? 'start.installingMultisite' : 'start.installing'));
-  const installArgs = [
+  // 7. Silent install of the base single site.
+  step(t('start.installing'));
+  await dockerExec(container, [
     'wp',
     'core',
-    multisite ? 'multisite-install' : 'install',
+    'install',
     `--url=http://${dom}`,
     `--title=Dev: ${dom}`,
     `--admin_user=${adminUser}`,
     `--admin_password=${adminPass}`,
     `--admin_email=${ADMIN_EMAIL}`,
     '--skip-email',
-  ];
-  if (subdomains) installArgs.push('--subdomains');
-  installArgs.push('--skip-plugins', '--skip-themes', '--allow-root');
-  await dockerExec(container, installArgs);
+    '--skip-plugins',
+    '--skip-themes',
+    '--allow-root',
+  ]);
+
+  // 7b. Multisite: create the network tables while WP is still single-site
+  //     (--skip-config: we manage wp-config ourselves), then enable the MULTISITE
+  //     constants. Order matters — the constants must come AFTER the tables exist.
+  if (multisite) {
+    step(t('start.enablingMultisite'));
+    const conv = await dockerExecCapture(container, [
+      'wp',
+      'core',
+      'multisite-convert',
+      '--skip-config',
+      ...(subdomains ? ['--subdomains'] : []),
+      `--title=Dev: ${dom}`,
+      '--allow-root',
+    ]);
+    // Tolerate an already-converted network so re-running `start` is idempotent.
+    if (conv.code !== 0 && !/already/i.test(`${conv.stdout}\n${conv.stderr}`)) {
+      throw new Error(conv.stderr || conv.stdout || 'wp core multisite-convert failed');
+    }
+    await writeWpConfig(multisiteConfig(dom, { subdomains }));
+  }
 
   // 8. Pretty permalinks.
   step(t('start.permalinks'));

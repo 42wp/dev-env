@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { render, renderTemplate } from '../src/lib/render.js';
+import { render, renderTemplate, readTemplate } from '../src/lib/render.js';
 
 test('render substitutes placeholders', () => {
   const out = render('host={{DOMAIN}} db={{DB_NAME}}', {
@@ -23,4 +23,13 @@ test('Dockerfile template renders the WordPress image tag', async () => {
   const out = await renderTemplate('project.Dockerfile', { WP_TAG: 'php8.4-apache' });
   assert.match(out, /^FROM wordpress:php8.4-apache$/m);
   assert.ok(!out.includes('{{'), 'no placeholders left');
+});
+
+test('multisite .htaccess templates strip the site prefix (no redirect loop)', async () => {
+  // The prefix-capturing rule is what makes /br/wp-admin/ resolve instead of looping.
+  const subdir = await readTemplate('htaccess.multisite-subdir');
+  assert.ok(subdir.includes('^([_0-9a-zA-Z-]+/)?(wp-(content|admin|includes).*) $2 [L]'));
+
+  const subdomain = await readTemplate('htaccess.multisite-subdomain');
+  assert.ok(subdomain.includes('^(wp-(content|admin|includes).*) $1 [L]'));
 });

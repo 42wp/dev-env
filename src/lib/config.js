@@ -25,3 +25,19 @@ export function resolveWpTag(override) {
 export function wpImage(tag) {
   return `wordpress:${tag}`;
 }
+
+// The multisite constants block injected into wp-config.php (the {{MULTISITE_CONFIG}}
+// placeholder). Must only be written AFTER the network tables exist — see the
+// two-phase flow in commands/start.js.
+export function multisiteConfig(dom, { subdomains = false } = {}) {
+  return [
+    '/* Multisite */',
+    "define( 'WP_ALLOW_MULTISITE', true );",
+    "define( 'MULTISITE', true );",
+    `define( 'SUBDOMAIN_INSTALL', ${subdomains ? 'true' : 'false'} );`,
+    `define( 'DOMAIN_CURRENT_SITE', '${dom}' );`,
+    "define( 'PATH_CURRENT_SITE', '/' );",
+    "define( 'SITE_ID_CURRENT_SITE', 1 );",
+    "define( 'BLOG_ID_CURRENT_SITE', 1 );",
+  ].join('\n');
+}

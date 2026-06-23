@@ -15,6 +15,9 @@ define( 'WP_DEBUG_LOG', true );
 define( 'WP_DEBUG_DISPLAY', false );
 define( 'DISABLE_WP_CRON', true );
 
+{{MULTISITE_CONFIG}}
+/* That's all, stop editing! Happy publishing. */
+
 if ( ! defined( 'ABSPATH' ) ) {
     define( 'ABSPATH', __DIR__ . '/' );
 }

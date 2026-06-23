@@ -85,11 +85,13 @@ Start a site as a WordPress network with `--multisite` (subdirectory) or add
 42wp start my-network --multisite --subdomains  # sites at site2.my-network.localhost
 ```
 
-This runs `wp core multisite-install` (which writes the `MULTISITE` constants into
-`wp-config.php`). For **subdomain** networks the Traefik router is widened to a
-wildcard (`*.my-network.localhost`) so sub-sites route to the container — and
-`*.localhost` already resolves to `127.0.0.1`, so no `/etc/hosts` edits are needed.
-Network admin lives at `…/wp-admin/network/`.
+This installs WordPress, converts it to a network, writes the `MULTISITE` constants
+into `wp-config.php`, and mounts a `.htaccess` with the matching network rewrite
+rules (WP-CLI refuses to generate those for a multisite, which otherwise causes a
+redirect loop on sub-sites). For **subdomain** networks the Traefik router is
+widened to a wildcard (`*.my-network.localhost`) so sub-sites route to the
+container; `*.localhost` already resolves to `127.0.0.1`, so no `/etc/hosts` edits
+are needed. Network admin lives at `…/wp-admin/network/`.
 
 ### WordPress VIP (mu-plugins)
 

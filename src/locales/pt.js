@@ -25,7 +25,7 @@ export default {
   'start.upping': 'Subindo containers do projeto...',
   'start.waitingWp': 'Aguardando o container WP responder...',
   'start.installing': 'Executando instalação silenciosa do WordPress...',
-  'start.installingMultisite': 'Executando instalação silenciosa do WordPress multisite...',
+  'start.enablingMultisite': 'Habilitando multisite (tabelas de rede + constantes no wp-config)...',
   'start.permalinks': 'Configurando Permalinks...',
   'start.success': 'Sucesso! O projeto está online.',
   'start.url': 'URL:      ${url}',

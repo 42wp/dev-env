@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { DEFAULT_WP_TAG, resolveWpTag, wpImage } from '../src/lib/config.js';
+import { DEFAULT_WP_TAG, resolveWpTag, wpImage, multisiteConfig } from '../src/lib/config.js';
 
 test('default tag is php8.4-apache (newest WP, PHP >= 8.4)', () => {
   assert.equal(DEFAULT_WP_TAG, 'php8.4-apache');
@@ -25,4 +25,14 @@ test('resolveWpTag precedence: flag > env > default', () => {
 
 test('wpImage builds the full reference', () => {
   assert.equal(wpImage('php8.4-apache'), 'wordpress:php8.4-apache');
+});
+
+test('multisiteConfig: subdirectory vs subdomain constants', () => {
+  const sub = multisiteConfig('demo.localhost');
+  assert.match(sub, /define\( 'MULTISITE', true \);/);
+  assert.match(sub, /define\( 'SUBDOMAIN_INSTALL', false \);/);
+  assert.match(sub, /define\( 'DOMAIN_CURRENT_SITE', 'demo\.localhost' \);/);
+
+  const sd = multisiteConfig('demo.localhost', { subdomains: true });
+  assert.match(sd, /define\( 'SUBDOMAIN_INSTALL', true \);/);
 });
