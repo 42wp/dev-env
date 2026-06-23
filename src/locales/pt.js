@@ -18,7 +18,7 @@ export default {
   'start.creatingDb': 'Criando banco de dados: ${db}',
   'start.genConfig': 'Gerando wp-config.php efêmero...',
   'start.saltsFallback': 'Não foi possível acessar api.wordpress.org; salts gerados localmente.',
-  'start.genDockerfile': 'Gerando Dockerfile...',
+  'start.genDockerfile': 'Gerando Dockerfile (${image})...',
   'start.genCompose': 'Gerando docker-compose do projeto...',
   'start.upping': 'Subindo containers do projeto...',
   'start.waitingWp': 'Aguardando o container WP responder...',
@@ -29,6 +29,13 @@ export default {
   'start.admin': 'Admin:    ${url}/wp-admin',
   'start.user': 'Usuário:  ${user}',
   'start.pass': 'Senha:    ${pass}',
+
+  // update
+  'update.needName': 'Informe o projeto para atualizar. Ex: 42wp update jovempan',
+  'update.notFound': "Projeto '${name}' não encontrado em ${dir}. Rode 42wp start ${name} primeiro.",
+  'update.rebuilding': 'Reconstruindo ${name} com ${image}...',
+  'update.updatingDb': 'Atualizando o schema do banco (wp core update-db)...',
+  'update.done': 'Atualizado! ${name} agora está no WordPress ${version}.',
 
   // stop
   'stop.needName': 'Informe o projeto para parar. Ex: 42wp stop jovempan',
@@ -47,6 +54,7 @@ export default {
   'usage.line': 'Uso: 42wp <comando> [projeto] [argumentos]',
   'usage.commands': 'Comandos:',
   'usage.start': "  start <projeto>    Inicia o ambiente usando '.localhost'.",
+  'usage.update': '  update <projeto>   Atualiza um projeto existente para uma imagem mais recente do WordPress.',
   'usage.stop': '  stop <projeto>     Para os containers do projeto.',
   'usage.wp': '  wp <projeto> ...   Executa um comando WP-CLI no container.',
   'usage.globalStart': '  global start       Inicia o proxy Traefik e o MySQL.',

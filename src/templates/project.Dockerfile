@@ -1,4 +1,4 @@
-FROM wordpress:6.9-php8.5-apache
+FROM wordpress:{{WP_TAG}}
 
 RUN rm -rf /usr/src/wordpress/wp-content/plugins/* \
     && rm -rf /usr/src/wordpress/wp-content/themes/*

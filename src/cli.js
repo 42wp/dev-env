@@ -7,6 +7,7 @@ import { plain, error } from './lib/log.js';
 import { start } from './commands/start.js';
 import { stop } from './commands/stop.js';
 import { wp } from './commands/wp.js';
+import { update } from './commands/update.js';
 import { startGlobal, stopGlobal } from './commands/global.js';
 
 function extractLang(argv) {
@@ -19,11 +20,27 @@ function extractLang(argv) {
   return lang;
 }
 
+// Pull recognized options (--wp <tag> / --wp=<tag>) out of an arg list, leaving
+// positionals behind. Used by `start` and `update`; NOT by `wp`, whose args pass
+// through verbatim to WP-CLI.
+function parseOpts(args) {
+  const opts = {};
+  const positionals = [];
+  for (let i = 0; i < args.length; i++) {
+    const a = args[i];
+    if (a === '--wp') opts.wp = args[++i];
+    else if (a.startsWith('--wp=')) opts.wp = a.slice('--wp='.length);
+    else positionals.push(a);
+  }
+  return { opts, positionals };
+}
+
 function printUsage() {
   plain(t('usage.line'));
   plain('');
   plain(t('usage.commands'));
   plain(t('usage.start'));
+  plain(t('usage.update'));
   plain(t('usage.stop'));
   plain(t('usage.wp'));
   plain(t('usage.globalStart'));
@@ -38,9 +55,17 @@ export async function run(rawArgs) {
   const command = argv[0];
 
   switch (command) {
-    case 'start':
-      await start(argv[1]);
+    case 'start': {
+      const { opts, positionals } = parseOpts(argv.slice(1));
+      await start(positionals[0], opts);
       break;
+    }
+
+    case 'update': {
+      const { opts, positionals } = parseOpts(argv.slice(1));
+      await update(positionals[0], opts);
+      break;
+    }
 
     case 'stop':
       await stop(argv[1]);

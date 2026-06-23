@@ -18,7 +18,7 @@ export default {
   'start.creatingDb': 'Creating database: ${db}',
   'start.genConfig': 'Generating ephemeral wp-config.php...',
   'start.saltsFallback': 'Could not reach api.wordpress.org; generated salts locally.',
-  'start.genDockerfile': 'Generating Dockerfile...',
+  'start.genDockerfile': 'Generating Dockerfile (${image})...',
   'start.genCompose': 'Generating project docker-compose...',
   'start.upping': 'Starting project containers...',
   'start.waitingWp': 'Waiting for the WordPress container to respond...',
@@ -29,6 +29,13 @@ export default {
   'start.admin': 'Admin:    ${url}/wp-admin',
   'start.user': 'User:     ${user}',
   'start.pass': 'Password: ${pass}',
+
+  // update
+  'update.needName': 'Tell me which project to update. e.g.: 42wp update jovempan',
+  'update.notFound': "Project '${name}' not found at ${dir}. Run 42wp start ${name} first.",
+  'update.rebuilding': 'Rebuilding ${name} on ${image}...',
+  'update.updatingDb': 'Updating database schema (wp core update-db)...',
+  'update.done': 'Updated! ${name} is now on WordPress ${version}.',
 
   // stop
   'stop.needName': 'Tell me which project to stop. e.g.: 42wp stop jovempan',
@@ -47,6 +54,7 @@ export default {
   'usage.line': 'Usage: 42wp <command> [project] [arguments]',
   'usage.commands': 'Commands:',
   'usage.start': '  start <project>    Start the environment using \'.localhost\'.',
+  'usage.update': '  update <project>   Update an existing project to a newer WordPress image.',
   'usage.stop': '  stop <project>     Stop the project containers.',
   'usage.wp': '  wp <project> ...   Run a WP-CLI command inside the container.',
   'usage.globalStart': '  global start       Start the Traefik proxy and MySQL.',

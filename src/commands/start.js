@@ -13,13 +13,14 @@ import { compose, dockerExec, dockerExecCapture } from '../lib/docker.js';
 import { pollUntil } from '../lib/wait.js';
 import { step, success, plain, error, colors } from '../lib/log.js';
 import { t } from '../lib/i18n.js';
+import { resolveWpTag, wpImage } from '../lib/config.js';
 import { ensureDockerRunning, checkGlobalLayer } from './global.js';
 
 const ADMIN_USER = 'admin';
 const ADMIN_PASS = 'password';
 const ADMIN_EMAIL = 'dev@42wp.localhost';
 
-export async function start(rawName) {
+export async function start(rawName, opts = {}) {
   if (!rawName) {
     error(t('start.needName'));
     process.exitCode = 1;
@@ -63,9 +64,11 @@ export async function start(rawName) {
   });
   await fs.writeFile(path.join(envDir, 'wp-config.php'), wpConfig, 'utf8');
 
-  // 3. Dockerfile.
-  step(t('start.genDockerfile'));
-  await fs.writeFile(path.join(envDir, 'Dockerfile'), await readTemplate('project.Dockerfile'), 'utf8');
+  // 3. Dockerfile (FROM the resolved WordPress image tag).
+  const wpTag = resolveWpTag(opts.wp);
+  step(t('start.genDockerfile', { image: wpImage(wpTag) }));
+  const dockerfile = await renderTemplate('project.Dockerfile', { WP_TAG: wpTag });
+  await fs.writeFile(path.join(envDir, 'Dockerfile'), dockerfile, 'utf8');
 
   // 4. Project docker-compose.yml.
   step(t('start.genCompose'));

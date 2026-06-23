@@ -27,12 +27,29 @@ This installs the `42wp` command globally.
 ```bash
 42wp global start          # start Traefik + MySQL + phpMyAdmin + Mailpit
 42wp start <project>       # build & start a project (run from your theme/plugin repo)
+42wp update <project>      # update an existing project to a newer WordPress image
 42wp wp <project> <args>   # run a WP-CLI command inside the project container
 42wp stop <project>        # stop a project's containers
 42wp global stop           # tear the global layer down
 ```
 
 Run `42wp` with no arguments for the full command list.
+
+### WordPress version
+
+By default projects are built on **`wordpress:php8.4-apache`** (newest WordPress,
+PHP 8.4, Apache). Pick a different image tag per project with `--wp <tag>`:
+
+```bash
+42wp start my-theme --wp latest             # newest WP, image's default PHP
+42wp start legacy   --wp 6.9-php8.5-apache  # pin a specific WP + PHP
+42wp update my-theme                        # rebuild on the default tag, run wp core update-db
+42wp update my-theme --wp php8.5-apache     # update to a specific image
+```
+
+`update` rewrites the project's Dockerfile, re-pulls the base image, recreates the
+container and runs `wp core update-db` to migrate the schema. Set a different
+default for every project with the `FORTYTWO_WP_TAG` env var.
 
 ### Example
 
@@ -74,12 +91,13 @@ underscores; a trailing `.suffix` (e.g. `.localhost`) is stripped.
 
 | Env var         | Default        | Description                                   |
 | --------------- | -------------- | --------------------------------------------- |
-| `FORTYTWO_HOME` | `~/.42wp`      | Where the global compose, DB data and projects live |
-| `FORTYTWO_LANG` | auto (`LANG`)  | UI language: `en` or `pt`                     |
-| `NO_COLOR`      | unset          | Disable colored output                        |
+| `FORTYTWO_HOME`   | `~/.42wp`        | Where the global compose, DB data and projects live |
+| `FORTYTWO_WP_TAG` | `php8.4-apache`  | Default WordPress image tag for new projects (overridden by `--wp`) |
+| `FORTYTWO_LANG`   | auto (`LANG`)    | UI language: `en` or `pt`                   |
+| `NO_COLOR`        | unset            | Disable colored output                      |
 
 You can also pass `--lang en` / `--lang pt` before the command.
 
 ## License
 
-MIT © João Carvalho
+MIT
