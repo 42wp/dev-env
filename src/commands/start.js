@@ -17,6 +17,7 @@ import { projectDir } from '../lib/paths.js';
 import { renderTemplate, render, readTemplate } from '../lib/render.js';
 import { fetchSalts } from '../lib/salts.js';
 import { run, compose, dockerExec, dockerExecCapture } from '../lib/docker.js';
+import { runSeeder } from '../lib/seeder.js';
 import { pollUntil } from '../lib/wait.js';
 import { step, success, plain, error, colors } from '../lib/log.js';
 import { t } from '../lib/i18n.js';
@@ -24,6 +25,7 @@ import {
   resolveWpTag,
   wpImage,
   multisiteConfig,
+  resolveDemoCount,
   DEFAULT_ADMIN_USER,
   DEFAULT_ADMIN_PASS,
   VIP_MU_PLUGINS_REPO,
@@ -69,6 +71,7 @@ export async function start(rawName, opts = {}) {
   // --subdomains implies multisite; without it, --multisite is subdirectory mode.
   const subdomains = !!opts.subdomains;
   const multisite = !!opts.multisite || subdomains;
+  const demoCount = resolveDemoCount(opts['demo-content']); // null when not requested
 
   if (!(await ensureDockerRunning())) return;
   await checkGlobalLayer();
@@ -209,6 +212,16 @@ export async function start(rawName, opts = {}) {
     '--hard',
     '--allow-root',
   ]);
+
+  // 9. Optional demo content (--demo-content[=<n>]) — always creates, never fatal.
+  if (demoCount) {
+    step(t('start.demoGenerating', { count: demoCount }));
+    try {
+      await runSeeder(container, demoCount);
+    } catch {
+      step(t('start.demoFailed'));
+    }
+  }
 
   const url = `http://${dom}`;
   success(t('start.success'));

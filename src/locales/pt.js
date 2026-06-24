@@ -27,6 +27,8 @@ export default {
   'start.installing': 'Executando instalação silenciosa do WordPress...',
   'start.enablingMultisite': 'Habilitando multisite (tabelas de rede + constantes no wp-config)...',
   'start.permalinks': 'Configurando Permalinks...',
+  'start.demoGenerating': 'Gerando ${count} posts de demonstração (autores, tags, categorias, imagens)...',
+  'start.demoFailed': 'Não foi possível gerar o conteúdo de demonstração (continuando mesmo assim).',
   'start.success': 'Sucesso! O projeto está online.',
   'start.url': 'URL:      ${url}',
   'start.admin': 'Admin:    ${url}/wp-admin',
@@ -54,6 +56,11 @@ export default {
   'rm.removingData': 'Removendo dados do projeto: ${dir}',
   'rm.done': "Removido '${name}'. Seu repositório não foi tocado.",
 
+  // seed
+  'seed.needName': 'Informe o projeto para popular. Ex: 42wp seed jovempan',
+  'seed.notRunning': "O projeto '${name}' não está rodando. Inicie com 42wp start ${name} primeiro.",
+  'seed.failed': 'Falha ao gerar o conteúdo de demonstração.',
+
   // stop
   'stop.needName': 'Informe o projeto para parar. Ex: 42wp stop jovempan',
   'stop.stopping': 'Parando o ambiente ${name}...',
@@ -74,6 +81,7 @@ export default {
   'usage.update': '  update <projeto>   Atualiza um projeto existente para uma imagem mais recente do WordPress.',
   'usage.stop': '  stop <projeto>     Para os containers do projeto.',
   'usage.rm': '  rm <projeto>       Remove um site (container, imagem, banco) — mantém seu repositório.',
+  'usage.seed': '  seed <projeto> [n]  Gera conteúdo de demo em um projeto rodando (padrão 200 posts).',
   'usage.wp': '  wp <projeto> ...   Executa um comando WP-CLI no container.',
   'usage.globalStart': '  global start       Inicia o proxy Traefik e o MySQL.',
   'usage.globalStop': '  global stop        Para a infraestrutura global.',

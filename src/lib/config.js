@@ -16,6 +16,19 @@ export const DEFAULT_ADMIN_PASS = 'password';
 // wp-content/mu-plugins when `start --vip` is used.
 export const VIP_MU_PLUGINS_REPO = 'https://github.com/Automattic/vip-go-mu-plugins-built';
 
+// Demo content: how many posts `--demo-content` generates by default.
+export const DEFAULT_DEMO_COUNT = 200;
+
+// Resolve the requested demo-post count from the --demo-content option value.
+// Returns null when not requested; the default when passed as a bare flag; or the
+// parsed positive integer for --demo-content=<n> (falling back to the default).
+export function resolveDemoCount(value) {
+  if (value === undefined || value === false) return null;
+  if (value === true) return DEFAULT_DEMO_COUNT;
+  const n = parseInt(value, 10);
+  return Number.isFinite(n) && n > 0 ? n : DEFAULT_DEMO_COUNT;
+}
+
 // Resolve the effective tag: explicit flag wins, then env var, then default.
 export function resolveWpTag(override) {
   return override || process.env.FORTYTWO_WP_TAG || DEFAULT_WP_TAG;

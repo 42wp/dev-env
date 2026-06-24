@@ -31,6 +31,7 @@ This installs the `42wp` command globally.
 42wp wp <project> <args>   # run a WP-CLI command inside the project container
 42wp stop <project>        # stop a project's containers
 42wp rm <project>          # remove a site (container, image, database) — keeps your repo
+42wp seed <project> [n]    # generate demo content in a running project (default 200)
 42wp global stop           # tear the global layer down
 ```
 
@@ -64,6 +65,41 @@ with `--yes` (or `--force`):
 ```bash
 42wp rm my-theme          # prompts before removing
 42wp rm my-theme --yes    # no prompt (for scripts/CI)
+```
+
+### Demo content
+
+Seed a project with a full demo dataset using `--demo-content` (defaults to 200
+posts), or set a count with `--demo-content=<n>`:
+
+```bash
+42wp start my-site --demo-content       # ~200 posts
+42wp start my-site --demo-content=50    # 50 posts
+```
+
+It runs a PHP seeder (`wp eval-file`) — no plugin required (FakerPress has no CLI) —
+that creates:
+
+- ~10 `42wp_author` terms (Portuguese names), ~10 tags, ~10 categories
+- a small pool of real images downloaded from [picsum.photos](https://picsum.photos/),
+  reused as featured + inline images
+- posts with rich HTML content (h1/h2/h3, lists, blockquote, images, links), a
+  plain-text excerpt, varied **past** dates, and each linked to 1 category, 2–5
+  tags and 1–3 authors
+
+Works on any project (not just `--vip`). It always creates the requested number of
+posts (it doesn't skip when posts already exist), and a failure never aborts
+`start`. The author terms use the `42wp_author` taxonomy, which the project
+registers itself (e.g. the `42-framework` mu-plugin) — the seeder does not register
+any taxonomy. If `42wp_author` isn't available, the author links are simply skipped.
+
+To add demo content to an **already-running** project without recreating it, use
+`seed`:
+
+```bash
+42wp seed my-site         # 200 posts
+42wp seed my-site 500     # 500 posts
+42wp seed my-site --demo-content=50
 ```
 
 ### Admin credentials

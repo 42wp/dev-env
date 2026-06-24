@@ -27,6 +27,8 @@ export default {
   'start.installing': 'Running silent WordPress install...',
   'start.enablingMultisite': 'Enabling multisite (network tables + wp-config constants)...',
   'start.permalinks': 'Configuring permalinks...',
+  'start.demoGenerating': 'Seeding ${count} demo posts (authors, tags, categories, images)...',
+  'start.demoFailed': 'Could not generate demo content (continuing anyway).',
   'start.success': 'Success! The project is online.',
   'start.url': 'URL:      ${url}',
   'start.admin': 'Admin:    ${url}/wp-admin',
@@ -54,6 +56,11 @@ export default {
   'rm.removingData': 'Removing project data: ${dir}',
   'rm.done': "Removed '${name}'. Your repository was left untouched.",
 
+  // seed
+  'seed.needName': 'Tell me which project to seed. e.g.: 42wp seed jovempan',
+  'seed.notRunning': "Project '${name}' is not running. Start it first with 42wp start ${name}.",
+  'seed.failed': 'Demo content generation failed.',
+
   // stop
   'stop.needName': 'Tell me which project to stop. e.g.: 42wp stop jovempan',
   'stop.stopping': 'Stopping the ${name} environment...',
@@ -74,6 +81,7 @@ export default {
   'usage.update': '  update <project>   Update an existing project to a newer WordPress image.',
   'usage.stop': '  stop <project>     Stop the project containers.',
   'usage.rm': '  rm <project>       Remove a site (container, image, database) — keeps your repo.',
+  'usage.seed': '  seed <project> [n]  Generate demo content in a running project (default 200 posts).',
   'usage.wp': '  wp <project> ...   Run a WP-CLI command inside the container.',
   'usage.globalStart': '  global start       Start the Traefik proxy and MySQL.',
   'usage.globalStop': '  global stop        Stop the global infrastructure.',

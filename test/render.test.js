@@ -33,3 +33,15 @@ test('multisite .htaccess templates strip the site prefix (no redirect loop)', a
   const subdomain = await readTemplate('htaccess.multisite-subdomain');
   assert.ok(subdomain.includes('^(wp-(content|admin|includes).*) $1 [L]'));
 });
+
+test('demo seeder template covers the required dataset', async () => {
+  const seed = await readTemplate('demo-seed.php');
+  // The taxonomy is provided by the project (42-framework); the seeder must NOT register it.
+  assert.ok(!seed.includes('register_taxonomy'), 'does not register taxonomies');
+  assert.ok(seed.includes('picsum.photos'), 'downloads picsum images');
+  assert.ok(seed.includes('media_sideload_image'), 'sideloads images');
+  assert.ok(seed.includes("wp_set_object_terms( $post_id, $pick( $tag_ids, 2, 5 ), 'post_tag' )"), '2-5 tags');
+  assert.ok(seed.includes("$pick( $author_ids, 1, 3 ), '42wp_author'"), '1-3 authors');
+  assert.ok(seed.includes('set_post_thumbnail'), 'featured image');
+  assert.ok(seed.includes('$now - wp_rand'), 'past dates only');
+});

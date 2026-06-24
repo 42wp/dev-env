@@ -16,6 +16,21 @@ export function run(cmd, args, opts = {}) {
   });
 }
 
+// Run a command with `input` piped to its stdin, streaming stdout/stderr to the
+// user. Used to feed a PHP script to `docker exec -i ... wp eval-file -`.
+export function runWithInput(cmd, args, input, opts = {}) {
+  return new Promise((resolve, reject) => {
+    const child = spawn(cmd, args, { stdio: ['pipe', 'inherit', 'inherit'], ...opts });
+    child.on('error', reject);
+    child.on('close', (code) => {
+      if (code === 0) resolve();
+      else reject(new Error(`${cmd} ${args.join(' ')} exited with code ${code}`));
+    });
+    child.stdin.write(input);
+    child.stdin.end();
+  });
+}
+
 // Run a command quietly and capture its output. Never rejects on a non-zero exit;
 // callers inspect `.code`. Rejects only if the binary can't be spawned at all.
 export function capture(cmd, args, opts = {}) {

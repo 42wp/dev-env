@@ -34,6 +34,17 @@ test('parseOpts: --vip=url keeps the string value', () => {
   assert.equal(opts.vip, 'https://example.com/repo');
 });
 
+test('parseOpts: hyphenated flags (--demo-content bare and =value)', () => {
+  assert.deepEqual(parseOpts(['site', '--demo-content']), {
+    opts: { 'demo-content': true },
+    positionals: ['site'],
+  });
+  assert.deepEqual(parseOpts(['site', '--demo-content=50']), {
+    opts: { 'demo-content': '50' },
+    positionals: ['site'],
+  });
+});
+
 test('parseOpts: combined flags', () => {
   assert.deepEqual(parseOpts(['site', '--wp', 'php8.4-apache', '--user', 'bob', '--vip']), {
     opts: { wp: 'php8.4-apache', user: 'bob', vip: true },
