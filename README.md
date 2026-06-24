@@ -108,6 +108,12 @@ The clone lives in the project's data dir (`~/.42wp/projects/<name>/mu-plugins`)
 so it never touches your repo, and re-running `start` fast-forwards it. Regular
 (non-VIP) projects are unaffected.
 
+`--vip` also mounts a small **dev-helper mu-plugin** (`00-42wp-dev.php`) that loads
+the WordPress admin media includes in admin/REST/CLI contexts. This fixes
+"Call to undefined function `media_handle_sideload()`"-style errors from plugins
+like FakerPress, which the VIP environment triggers by loading `file.php` early.
+It's mounted from the data dir, so your repo and the cloned VIP suite stay clean.
+
 ### Example
 
 ```bash

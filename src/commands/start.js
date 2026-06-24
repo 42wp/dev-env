@@ -112,7 +112,14 @@ export async function start(rawName, opts = {}) {
   //    multisite .htaccess (wp-cli won't write network rewrite rules itself).
   step(t('start.genCompose'));
   const extraVolumeLines = [];
-  if (opts.vip) extraVolumeLines.push('      - ./mu-plugins:/var/www/html/wp-content/mu-plugins');
+  if (opts.vip) {
+    extraVolumeLines.push('      - ./mu-plugins:/var/www/html/wp-content/mu-plugins');
+    // Dev-helper mu-plugin (loads admin media includes). Mounted as a top-level
+    // mu-plugin so WordPress auto-loads it; the 00- prefix loads it first.
+    extraVolumeLines.push(
+      '      - ./dev-helper.php:/var/www/html/wp-content/mu-plugins/00-42wp-dev.php',
+    );
+  }
   if (multisite) extraVolumeLines.push('      - ./.htaccess:/var/www/html/.htaccess');
   const extraVolumes = extraVolumeLines.length ? `\n${extraVolumeLines.join('\n')}` : '';
   const projectCompose = await renderTemplate('project.docker-compose.yml', {
@@ -133,9 +140,12 @@ export async function start(rawName, opts = {}) {
     await fs.writeFile(path.join(envDir, '.htaccess'), await readTemplate(htTemplate), 'utf8');
   }
 
-  // 4c. WordPress VIP: clone the mu-plugins before bringing the container up so the
-  //     mount source exists.
-  if (opts.vip) await ensureVipMuPlugins(envDir);
+  // 4c. WordPress VIP: clone the mu-plugins and write the dev-helper mu-plugin
+  //     before bringing the container up (so both mount sources exist).
+  if (opts.vip) {
+    await ensureVipMuPlugins(envDir);
+    await fs.writeFile(path.join(envDir, 'dev-helper.php'), await readTemplate('dev-helper.php'), 'utf8');
+  }
 
   // 5. Build & start project containers.
   step(t('start.upping'));
