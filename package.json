@@ -14,8 +14,17 @@
     "node": ">=18.17"
   },
   "scripts": {
-    "test": "node --test"
+    "test": "node --test",
+    "prepublishOnly": "node --test"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/42wp/dev-env.git"
+  },
+  "bugs": {
+    "url": "https://github.com/42wp/dev-env/issues"
+  },
+  "homepage": "https://github.com/42wp/dev-env#readme",
   "keywords": [
     "wordpress",
     "docker",
