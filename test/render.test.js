@@ -25,6 +25,13 @@ test('Dockerfile template renders the WordPress image tag', async () => {
   assert.ok(!out.includes('{{'), 'no placeholders left');
 });
 
+test('Dockerfile raises the PHP upload limit to 2G (with matching post_max_size)', async () => {
+  const out = await renderTemplate('project.Dockerfile', { WP_TAG: 'php8.4-apache' });
+  assert.match(out, /upload_max_filesize = 2048M/);
+  // post_max_size must be >= upload_max_filesize or WordPress caps at the lower one.
+  assert.match(out, /post_max_size = 2048M/);
+});
+
 test('wp-config sets WP_ENVIRONMENT_TYPE local and renders cleanly', async () => {
   const tpl = await readTemplate('wp-config.php');
   // Environment type is always 'local' so wp_get_environment_type() never reports production.
