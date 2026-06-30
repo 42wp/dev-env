@@ -15,6 +15,9 @@ define( 'WP_DEBUG_LOG', true );
 define( 'WP_DEBUG_DISPLAY', false );
 define( 'DISABLE_WP_CRON', true );
 
+/* Dev environment: make wp_get_environment_type() report 'local'. */
+define( 'WP_ENVIRONMENT_TYPE', 'local' );
+
 {{MULTISITE_CONFIG}}
 /* That's all, stop editing! Happy publishing. */
 

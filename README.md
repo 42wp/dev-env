@@ -186,6 +186,13 @@ api.wordpress.org, with a local fallback when offline), a `Dockerfile`, and a
 `wp core install`. The DB name is the project name with hyphens turned into
 underscores; a trailing `.suffix` (e.g. `.localhost`) is stripped.
 
+The generated `wp-config.php` always defines `WP_ENVIRONMENT_TYPE` as `local`, so
+`wp_get_environment_type()` reports `local` (not the WordPress default of
+`production`) — code and plugins that branch on the environment behave as they
+should in dev. The constant is set before mu-plugins load, so it holds even under
+`--vip`. The config is regenerated every `start`, so to apply this to an
+**existing** project, just re-run `42wp start <project>`.
+
 ## Configuration
 
 | Env var         | Default        | Description                                   |

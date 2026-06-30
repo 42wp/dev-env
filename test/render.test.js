@@ -25,6 +25,15 @@ test('Dockerfile template renders the WordPress image tag', async () => {
   assert.ok(!out.includes('{{'), 'no placeholders left');
 });
 
+test('wp-config sets WP_ENVIRONMENT_TYPE local and renders cleanly', async () => {
+  const tpl = await readTemplate('wp-config.php');
+  // Environment type is always 'local' so wp_get_environment_type() never reports production.
+  assert.match(tpl, /define\( 'WP_ENVIRONMENT_TYPE', 'local' \);/);
+  // render() throws on a missing variable, so this also guards the start.js wiring.
+  const out = render(tpl, { DB_NAME: 'x', WP_SALTS: '', MULTISITE_CONFIG: '' });
+  assert.ok(!out.includes('{{'), 'no placeholders left');
+});
+
 test('multisite .htaccess templates strip the site prefix (no redirect loop)', async () => {
   // The prefix-capturing rule is what makes /br/wp-admin/ resolve instead of looping.
   const subdir = await readTemplate('htaccess.multisite-subdir');
