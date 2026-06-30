@@ -1,6 +1,6 @@
 {
   "name": "@42wp/dev-env",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "42WP — a CLI to spin up disposable WordPress dev environments with Docker (Traefik + MySQL + per-project containers).",
   "type": "module",
   "bin": {
